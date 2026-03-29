@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Combined System</title>
+
+    <style>
+        body { font-family: Arial; }
+
+        fieldset {
+            margin: 15px;
+            padding: 15px;
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 30%;
+            left: 35%;
+            background: lightgreen;
+            padding: 20px;
+            z-index: 9999;
+            border: 2px solid green;
+        }
+
+        canvas {
+            margin-top: 10px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Combined System</h1>
+
+<!-- ================= JOB APPLICATION ================= -->
+
+<h2>Job Application</h2>
+
+<form onsubmit="return validateJob()">
+
+<fieldset>
+<legend>Personal Details</legend>
+
+Name: <input type="text" id="jname"><br><br>
+Email: <input type="text" id="jemail"><br><br>
+Phone: <input type="text"><br><br>
+
+Gender:
+<input type="radio" name="jgender">Male
+<input type="radio" name="jgender">Female
+</fieldset>
+
+<fieldset>
+<legend>Skills & Experience</legend>
+
+Skills:
+<input type="checkbox" name="skills">HTML
+<input type="checkbox" name="skills">CSS
+<input type="checkbox" name="skills">JS
+<input type="checkbox" name="skills">React
+<input type="checkbox" name="skills">Node<br><br>
+
+Experience:
+<input type="radio" name="exp" value="Fresher" onclick="toggleExp()">Fresher
+<input type="radio" name="exp" value="Experienced" onclick="toggleExp()">Experienced<br><br>
+
+Years: <input type="number" id="years"><br><br>
+
+Position:
+<select>
+<option>Developer</option>
+<option>Tester</option>
+</select>
+</fieldset>
+
+<fieldset>
+<legend>Resume</legend>
+
+<textarea id="cover" placeholder="Min 100 words"></textarea>
+</fieldset>
+
+<canvas id="logo" width="200" height="100"></canvas><br><br>
+
+<input type="submit" value="Apply">
+
+</form>
+
+<hr>
+
+<!-- ================= EVENT BOOKING ================= -->
+
+<h2>Event Booking</h2>
+
+Name: <input type="text"><br><br>
+Email: <input type="text" id="email"><br><br>
+
+Tickets:
+<select id="tickets">
+<option>1</option><option>2</option><option>3</option>
+<option>4</option><option>5</option>
+</select><br><br>
+
+Extras:
+<input type="checkbox" class="extra" value="200">Food
+<input type="checkbox" class="extra" value="100">Kit
+<input type="checkbox" class="extra" value="150">Certificate<br><br>
+
+<canvas id="seats" width="300" height="300"></canvas><br><br>
+
+<button onclick="book()">Book</button>
+
+<!-- Popup -->
+<div id="popup">Success!</div>
+
+<script>
+
+// ================= JOB SECTION =================
+
+// Canvas logo
+let c = document.getElementById("logo");
+let ctx1 = c.getContext("2d");
+ctx1.fillStyle = "blue";
+ctx1.fillRect(20,20,150,60);
+ctx1.fillStyle = "white";
+ctx1.fillText("IT Company", 50, 55);
+
+// Disable years if fresher
+function toggleExp() {
+    let exp = document.getElementsByName("exp");
+
+    for (let i = 0; i < exp.length; i++) {
+        if (exp[i].checked && exp[i].value == "Fresher") {
+            document.getElementById("years").disabled = true;
+        } else {
+            document.getElementById("years").disabled = false;
+        }
+    }
+}
+
+// Job validation
+function validateJob() {
+
+    let email = document.getElementById("jemail").value;
+    let cover = document.getElementById("cover").value;
+
+    let pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+    if (!pattern.test(email)) {
+        alert("Invalid Email");
+        return false;
+    }
+
+    let words = cover.trim().split(/\s+/);
+    if (words.length < 100) {
+        alert("Cover letter must be 100 words");
+        return false;
+    }
+
+    // Count skills (FOR LOOP)
+    let skills = document.getElementsByName("skills");
+    let count = 0;
+
+    for (let i = 0; i < skills.length; i++) {
+        if (skills[i].checked) count++;
+    }
+
+    alert("Skills Selected: " + count);
+
+    document.getElementById("popup").style.display = "block";
+
+    return false;
+}
+
+// ================= EVENT SECTION =================
+
+let canvas = document.getElementById("seats");
+let ctx = canvas.getContext("2d");
+
+let selectedSeats = [];
+
+// Draw 5x5 grid
+for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+        ctx.strokeRect(i*50, j*50, 40, 40);
+    }
+}
+
+// Seat selection
+canvas.addEventListener("click", function(e) {
+
+    let x = Math.floor(e.offsetX / 50);
+    let y = Math.floor(e.offsetY / 50);
+
+    let seat = x + "-" + y;
+
+    if (!selectedSeats.includes(seat)) {
+        selectedSeats.push(seat);
+        ctx.fillStyle = "green";
+        ctx.fillRect(x*50, y*50, 40, 40);
+    }
+});
+
+// Booking
+function book() {
+
+    let email = document.getElementById("email").value;
+
+    let pattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+    if (!pattern.test(email)) {
+        alert("Invalid Email");
+        return;
+    }
+
+    if (selectedSeats.length == 0) {
+        alert("Select at least one seat");
+        return;
+    }
+
+    let tickets = parseInt(document.getElementById("tickets").value);
+
+    if (tickets > selectedSeats.length) {
+        alert("Tickets exceed seats");
+        return;
+    }
+
+    let extras = document.getElementsByClassName("extra");
+    let total = tickets * 300;
+
+    for (let i = 0; i < extras.length; i++) {
+        if (extras[i].checked) {
+            total += parseInt(extras[i].value);
+        }
+    }
+
+    alert("Total: ₹" + total);
+
+    document.getElementById("popup").style.display = "block";
+}
+
+</script>
+
+</body>
+</html>
